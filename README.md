@@ -12,31 +12,53 @@ Next, let $f: ℝ^{d}\to ℝ$ be a Borel measurable recognition function. Now, w
 
 # Part 2: Data
 Training data set: https://www.bioid.com/face-database/
-Validation data set: 
+Validation data and Testing data: Byron provided to me in our shared folder. 
+Another 5 fake testing data come from https://this-person-does-not-exist.com/en
 
 ## Description of the Dataset
-The BioID Face Database contains 1,521 grayscale images with 23 distinct human subjects
-Each subject appears in multiple images under varying conditions
+For training data, we used the BioID Face Database that contains 1,521 grayscale images. All samples appear to be high-density samples of specific individuals. Each subject appears in multiple images under varying conditions. The validation data set contains 1974 images of regular human face images with color. 
+
+The major difference between training and validation data set is following. Training data set is a limited number of specific subjects (biometric focus) with multiple samples per person to teach the model specific identity features. However, the validation Set originates from the FFHQ dataset, which has different lighting, higher resolution origins, and much higher subject diversity. It is important to make sure validation data set is very different than the training data set. I used two sources of testing data. First one come from Byron, and contains 1988 images. Second one is from https://this-person-does-not-exist.com/en. I tested 5 of them. 
+
+After data processing, they are all exactly greyscale $64 \times 64$ pixels and all image based. Due to greyscale, we aim to concentrate on spatial factors rather than color information. 
 
 Instead of splitting the original dataset, I used a completely separate dataset for validation. This provides a stronger evaluation of generalization, since the model is tested on data drawn from a different distribution. The observed drop in performance indicates that the discriminator has partially overfitted to dataset-specific features rather than learning a fully distribution-invariant representation of faces.
 
 # Part 3: Challenges:
 ## Lack of evaluation metric: 
-One of the most immediate challenges encountered was the absence of a well-defined evaluation metric for the generative model. Unlike supervised learning tasks, where accuracy or loss directly measures performance, GANs do not provide a straightforward notion of correctness
+One of the challenges encountered was the absence of a well-defined evaluation metric for the generative model. Unlike supervised learning tasks, where accuracy or loss directly measures performance, GANs do not provide a straightforward notion of correctness. In our current implementation, the discriminator outputs values: D(x)∈[0,1]. The output of the discriminator represents the probability that an image is real. During training, we tracked the following. First, D(x): discriminator score on real images. Second, D(G(z)): discriminator score on generated images.
 
-In the current implementation, the discriminator outputs values:
+However, these values are not reliable indicators of model quality. First, a high D(x) may simply indicate overfitting to training data and a low D(G(z)) does not necessarily imply poor generation quality. The discriminator may become too strong or too weak, distorting these signals. Thus, evaluation relied heavily on visual inspection, which is subjective and difficult to quantify. 
 
-D(x)∈[0,1]
+## Preprocessing Constraints: 
+All images were resized to 64 × 64 grayscale, which simplifies the problem but introduces limitations. For instance, loss of fine facial details, reduced texture diversity, and potential distortion from resizing. Additionally, grayscale conversion removes color information, which could be useful for distinguishing features.
 
-which can be interpreted as the probability that an image is real. During training, I tracked:
+## Training Instability
+GAN training is inherently unstable due to its minimax optimization structure, minmax L(G,D). However, this creates a dynamic where the discriminator and generator compete
+Improvements in one can destabilize the other. In my practice, this led to oscillating loss values, sudden degradation in generated image quality, and sensitivity to hyperparameters. For example, when the discriminator becomes too strong, the generator receives vanishing gradients. On the other hand, if the generator becomes too strong, the discriminator fails to learn. 
 
-D(x): discriminator score on real images
-D(G(z)): discriminator score on generated images
+## Absence of a Proper Validation Method
+Another major challenge was the lack of a structured validation procedure. Initially, the code only evaluated discriminator outputs during training using the same dataset: $X\sim \mu_{ref}$. This creates a misleading picture of performance, since the model is evaluated on the same data it was trained on. A key difficulty was determining how to construct a validation process for a GAN. Unlike standard models, GANs do not naturally separate training and validation objectives. We considered two approaches, splitting the dataset into training and validation subsets and using a completely separate dataset. When I applied the first method, 
 
-However, these values are not reliable indicators of model quality. For example:
+The second approach was ultimately more appealing, since it evaluates generalization under distribution shift
 
-A high D(x) may simply indicate overfitting to training data
-A low D(G(z)) does not necessarily imply poor generation quality
-The discriminator may become too strong or too weak, distorting these signals
 
-Thus, one challenge was interpreting these values meaningfully. Without additional metrics such as Fréchet Inception Distance (FID) or Inception Score, evaluation relied heavily on visual inspection, which is subjective and difficult to quantify.
+However, this introduces additional complications, such as ensuring compatibility between datasets (e.g., resolution, grayscale format, normalization). Implementing this correctly required careful alignment of preprocessing pipelines.
+
+# Part 4: 
+(Colab notebook)[https://colab.research.google.com/drive/1OC2PGweVT6bePwWyCmZF5KjT3dmaRuSw?usp=sharing]
+
+# Part 5:
+## Problem A:  Overfitting to "Sensor Noise" and Legacy Format
+The BioID training set was captured with late-90s monochrome CCD cameras, which have a specific grain and low dynamic range. My discriminator has reached 100% accuracy by memorizing these specific pixel patterns rather than general facial geometry. When testing on modern, higher-resolution CMOS sensor images (Real Test Data), the cleaner digital signal looks like a "Fake" to the model.
+
+##  Problem B: The Aspect Ratio and Padding Trap
+As seen in my test visualization, the CenterCrop transformation often leaves black padding bars on the top or bottom of images that don't have a 1:1 aspect ratio. What went wrong, probably is the training set did not have these black bars. The Discriminator uses these high-contrast edges as a shortcut to classify the image as OOD (Fake), regardless of whether there is a face in the center.
+
+## Potential Improvement A: Advanced Data Augmentation
+Instead of a simple CenterCrop, I will implement a more robust pipeline to break the model's reliance on specific pixel locations. Random Resized Crop: This forces the model to recognize faces at different scales and positions, eliminating the "black bar" bias.
+
+On the other hand, Adding synthetic grain to the modern test images can help bridge the gap between modern sensors and the legacy BioID sensor style.
+
+## Potential Improvement B: Label Smoothing.
+Train the model using $0.9$ as the target for Real instead of $1.0$. This perhaps prevents the model from becoming overconfident in its narrow training distribution.
