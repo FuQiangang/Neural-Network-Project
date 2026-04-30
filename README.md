@@ -46,7 +46,8 @@ The second approach was ultimately more appealing, since it evaluates generaliza
 However, this introduces additional complications, such as ensuring compatibility between datasets (e.g., resolution, grayscale format, normalization). Implementing this correctly required careful alignment of preprocessing pipelines.
 
 # Part 4: 
-[Colab notebook](https://colab.research.google.com/drive/1OC2PGweVT6bePwWyCmZF5KjT3dmaRuSw?usp=sharing)
+This is the code of training: [Colab notebook]https://colab.research.google.com/drive/1q4tmwzm65zC3ltJuRGpJmStOP39vwdlQ#scrollTo=i44UxerQVgM-
+This is the code of testing: [Colab notebook](https://colab.research.google.com/drive/1OC2PGweVT6bePwWyCmZF5KjT3dmaRuSw?usp=sharing)
 
 # Part 5:
 ## Problem A:  Overfitting to "Sensor Noise" and Legacy Format
