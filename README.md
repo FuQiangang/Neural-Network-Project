@@ -43,6 +43,12 @@ Another major challenge was the lack of a structured validation procedure. Initi
 The second approach was ultimately more appealing, since it evaluates generalization under distribution shift. However, this introduces additional complications, such as ensuring compatibility between datasets (resolution, grayscale format, normalization). Implementing this correctly required careful alignment of data preprocessing. As the result showed below, in fact, this big distribution shift 
 
 # Part 4: 
+## We first illustrate the math setup of GAN 
+<img width="822" height="906" alt="Screenshot 2026-04-30 at 11 38 02 AM" src="https://github.com/user-attachments/assets/5d6b7a9e-2a82-4213-9440-fbba130d9702" />
+<img width="822" height="906" alt="Screenshot 2026-04-30 at 11 38 17 AM" src="https://github.com/user-attachments/assets/25b3bb1d-9f07-4c38-bbc0-ae32b14cdcc6" />
+<img width="822" height="906" alt="Screenshot 2026-04-30 at 11 38 23 AM" src="https://github.com/user-attachments/assets/02df8326-3f84-45cb-84af-ecf8f718abb8" />
+
+
 ## This is the training code: [Colab notebook](https://colab.research.google.com/drive/1q4tmwzm65zC3ltJuRGpJmStOP39vwdlQ?usp=sharing)
 
 ## This is the testing code: [Colab notebook](https://colab.research.google.com/drive/1OC2PGweVT6bePwWyCmZF5KjT3dmaRuSw?usp=sharing)
