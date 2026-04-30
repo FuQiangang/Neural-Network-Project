@@ -7,7 +7,7 @@ Let $\left(\Omega,\mathcal{F}, ℙ \right)$ be the underlying probability space 
 
 Now, let $\hat{V} = \\{v_1,...,v_m\\}$ be the tranining samples drawn from $P$. That is, each $v_i \in \hat{V}$ is a realization of independent copy of $V$ and $\left(v_i,1\right)\in\tilde{P}$. Moreover, let $\hat{K} = \\{k_1,...,k_n \\}$ from other known classes $K\subset \tilde{P}$. That is, each $k_i \in \hat{K}$ is also a relization of independent copy of $V$ such that $(k_i,-1)\in \tilde{P}$. Furthermore, let $U$ be a subset of unknown classes, that is, $P\cup K\cup U$ is a disjoint union and $P\cup K\cup U \subset \tilde{P}$. Finally, let test data $\\{t_1,...,t_z \\}\in P\cup K\cup U$. Then, we first observe that the test data contains unknown classes and is disjoint from the training set. 
 
-Next, let $f: ℝ^{d}\to ℝ$ be a Borel measurable recognition function. Now, we define R(f):= $ℙ\[sign(f(V)) ≠ L\]$. Equivelently, R(f) = $ℙ\[f(V)L < 0 \]$
+In this project, we used our trained GAN on one data set containing facial images to test if this GAN can accurately identify fake or real images in a completely different images, which come from modern era. However, the images we used to train come from 1990s.  
 
 
 # Part 2: Data
@@ -16,11 +16,11 @@ Validation data and Testing data: Byron provided to me in our shared folder.
 Another 5 fake testing data come from https://this-person-does-not-exist.com/en
 
 ## Description of the Dataset
-For training data, we used the BioID Face Database that contains 1,521 grayscale images. All samples appear to be high-density samples of specific individuals. Each subject appears in multiple images under varying conditions. The validation data set contains 1974 images of regular human face images with color. 
+For training data, we used the BioID Face Database that contains 1,521 grayscale images. All samples appear to be high-density samples of specific individuals. Each subject appears in multiple images under varying conditions. The validation data set contains 1974 images of regular human colorful facial images. For the fake testing data set, there are 1988 fake human facial images. 
 
-The major difference between training and validation data set is following. Training data set is a limited number of specific subjects (biometric focus) with multiple samples per person to teach the model specific identity features. However, the validation Set originates from the FFHQ dataset, which has different lighting, higher resolution origins, and much higher subject diversity. It is important to make sure validation data set is very different than the training data set. I used two sources of testing data. First one come from Byron, and contains 1988 images. Second one is from https://this-person-does-not-exist.com/en. I tested 5 of them. 
+The major difference between training and validation data sets is the following. The training data sets is a limited number of specific subjects (biometric focus) with multiple samples per person to teach the model specific identity features. However, the validation Set originates from the FFHQ dataset, which has different lighting, higher resolution origins, and much higher subject diversity. It is important to make sure the validation data set is very different than the training data set. I used two sources of testing data. The first one comes from Byron, and contains 1988 images. The second one is from https://this-person-does-not-exist.com/en. I tested 5 of them. 
 
-After data processing, they are all exactly greyscale $64 \times 64$ pixels and all image based. Due to greyscale, we aim to concentrate on spatial factors rather than color information. 
+After data processing, they are all exactly greyscale $64 \times 64$ pixels and all image-based. Due to greyscale, we aim to concentrate on spatial factors rather than color information. 
 
 Instead of splitting the original dataset, I used a completely separate dataset for validation. This provides a stronger evaluation of generalization, since the model is tested on data drawn from a different distribution. The observed drop in performance indicates that the discriminator has partially overfitted to dataset-specific features rather than learning a fully distribution-invariant representation of faces.
 
@@ -40,14 +40,25 @@ Improvements in one can destabilize the other. In my practice, this led to oscil
 ## Absence of a Proper Validation Method
 Another major challenge was the lack of a structured validation procedure. Initially, the code only evaluated discriminator outputs during training using the same dataset: $X\sim \mu_{ref}$. This creates a misleading picture of performance, since the model is evaluated on the same data it was trained on. A key difficulty was determining how to construct a validation process for a GAN. Unlike standard models, GANs do not naturally separate training and validation objectives. We considered two approaches, splitting the dataset into training and validation subsets and using a completely separate dataset. When I applied the first method, 
 
-The second approach was ultimately more appealing, since it evaluates generalization under distribution shift
-
-
-However, this introduces additional complications, such as ensuring compatibility between datasets (e.g., resolution, grayscale format, normalization). Implementing this correctly required careful alignment of preprocessing pipelines.
+The second approach was ultimately more appealing, since it evaluates generalization under distribution shift. However, this introduces additional complications, such as ensuring compatibility between datasets (resolution, grayscale format, normalization). Implementing this correctly required careful alignment of data preprocessing. As the result showed below, in fact, this big distribution shift 
 
 # Part 4: 
-This is the code of training: [Colab notebook]https://colab.research.google.com/drive/1q4tmwzm65zC3ltJuRGpJmStOP39vwdlQ#scrollTo=i44UxerQVgM-
-This is the code of testing: [Colab notebook](https://colab.research.google.com/drive/1OC2PGweVT6bePwWyCmZF5KjT3dmaRuSw?usp=sharing)
+## This is the training code: [Colab notebook](https://colab.research.google.com/drive/1q4tmwzm65zC3ltJuRGpJmStOP39vwdlQ?usp=sharing)
+
+## This is the testing code: [Colab notebook](https://colab.research.google.com/drive/1OC2PGweVT6bePwWyCmZF5KjT3dmaRuSw?usp=sharing)
+There are two data sources for testing part. The first source comes from fake images Byron provided. In the code, they are denoted as 
+We ran AUC and got the following result: <img width="959" height="721" alt="Screenshot 2026-04-29 at 11 36 57 PM" src="https://github.com/user-attachments/assets/4f2506b8-171a-439d-b8ba-c32eedff9d42" />
+
+The 0.41 AUC score shows that the Discriminator has learned the wrong rules. It consistently gives higher Realness scores to the Fakes than to the new Real test images. This shows GNA doesn't work well in an open class recognition problem.  
+
+We also showed softmax probability distribution as follow 
+
+<img width="1129" height="623" alt="Screenshot 2026-04-30 at 10 01 21 AM" src="https://github.com/user-attachments/assets/327f1fc0-d236-4124-b2f1-93ef83daefdf" />
+
+This picture also verifies GNA model's failure to generalize. First, The Real (Blue) Peak is sitting almost exactly at 0.500. In a perfect model, this should be over at 1.0. The Fake pictures from "Face Doesn't Exist" (Green) Peak is actually sitting slightly to the right of the Real peak (around 0.501). Lastly, The Fake (Red) Peak is the most spread out, with a significant tail stretching toward 0.504. This reaffirms that the model thinks the Fakes look more "Real" than the actual Real images. 
+
+Another observation is of high density. This means the Discriminator is giving almost every real image the exact same score. The tight clustering of all scores between 0.498 and 0.504 shows a model that has stiffened. The weights are so concentrated that the model can no longer move the probability significantly away from 0.5.
+
 
 # Part 5:
 ## Problem A:  Overfitting to "Sensor Noise" and Legacy Format
