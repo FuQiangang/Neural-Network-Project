@@ -50,6 +50,12 @@ The second approach was ultimately more appealing, since it evaluates generaliza
 
 
 ## This is the training code: [Colab notebook](https://colab.research.google.com/drive/1q4tmwzm65zC3ltJuRGpJmStOP39vwdlQ?usp=sharing)
+Here is how real images look like <img width="631" height="658" alt="Screenshot 2026-04-30 at 3 10 09 PM" src="https://github.com/user-attachments/assets/656d2ee3-cef4-4d26-bbc5-d98f672a59d7" />
+
+This is an example of how generated images look like 
+<img width="631" height="658" alt="Screenshot 2026-04-30 at 3 09 59 PM" src="https://github.com/user-attachments/assets/e67f1d69-6e33-4ebd-8ec9-273857f5f328" />
+
+
 
 ## This is the testing code: [Colab notebook](https://colab.research.google.com/drive/1OC2PGweVT6bePwWyCmZF5KjT3dmaRuSw?usp=sharing)
 There are two data sources for testing part. The first source comes from fake images Byron provided. In the code, they are denoted as 
